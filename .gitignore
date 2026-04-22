@@ -1,0 +1,49 @@
+# Data — never commit synthetic patient records
+data/raw/
+data/processed/
+data/synthea_output/
+*.fhir
+*.ndjson
+
+# Python
+.venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+.eggs/
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Experiments and model outputs
+experiments/runs/
+experiments/checkpoints/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# Environment
+.env
+.env.*
+
+# Claude Code (personal setup, not team tooling)
+.claude/
+CLAUDE.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Large reference files
+references/*.pdf
+references/*.docx

@@ -1,0 +1,16 @@
+# Core
+numpy
+pandas
+scikit-learn
+
+# Knowledge graphs
+networkx
+
+# Explainability
+shap
+
+# Experiment tracking
+# (add mlflow or wandb once Andy confirms preference)
+
+# Notebooks
+jupyter
