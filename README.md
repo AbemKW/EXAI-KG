@@ -22,7 +22,7 @@ references/     # Papers and design docs (gitignored)
 
 ## Setup
 
-Requires Python 3.10+ and Java (for Synthea).
+Requires Python 3.10+ (Java is no longer required on the host machine).
 
 ```bash
 python -m venv .venv
@@ -32,17 +32,19 @@ pip install -r requirements.txt
 
 ## Generating synthetic data
 
-Download the [Synthea JAR](https://github.com/synthetichealth/synthea/releases)
-and run:
+We use a custom Docker container to run Synthea, avoiding the need for local Java dependencies.
+
+To generate the initial 1,000 patient cohort, use the provided script:
 
 ```bash
-java -jar synthea-with-dependencies.jar -p 1000
+# Build the Docker image and generate data
+./scripts/generate_cohort.sh
 ```
 
-Move the output into `data/synthea_output/`. See `data/README.md` for details.
+The generated data (CSV/JSON files) will automatically be saved to `data/raw/synthea/`.
 
 ## Team
 
-- Andy Behrens (PI) — Dakota State University
-- Abem Woldesenbet — Dakota State University
-- Daun Davids — Dakota State University
+- Andy Behrens (PI) - Dakota State University
+- Abem Woldesenbet - Dakota State University
+- Daun Davids - Dakota State University
