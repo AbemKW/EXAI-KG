@@ -32,16 +32,17 @@ pip install -r requirements.txt
 
 ## Generating synthetic data
 
-We use a custom Docker container to run Synthea, avoiding the need for local Java dependencies.
+We use a unified script that enforces the **Seed 42** reproducibility standards for the project.
 
-To generate the baseline cohort (10,000 patients for Week 2), use the provided PowerShell script:
+`ash
+# Default: 1,000 patients with seed 42
+./scripts/generate_data.sh
 
-```powershell
-# Windows
-.\scripts\generate_10k_baseline.ps1
-```
+# Scale to 10,000 patients
+./scripts/generate_data.sh -p 10000
+`
 
-The generated baseline data will be saved to `data/raw/synthea_10k/`.
+The data will be saved to data/raw/synthea_<count>/.
 
 ## Controlled Perturbations
 
@@ -74,3 +75,5 @@ Due to disk space constraints, perturbations are applied **in-place** to the bas
 - Andy Behrens (PI) - Dakota State University
 - Abem Woldesenbet - Dakota State University
 - Daun Davids - Dakota State University
+
+
