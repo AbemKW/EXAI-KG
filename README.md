@@ -32,19 +32,48 @@ pip install -r requirements.txt
 
 ## Generating synthetic data
 
-We use a custom Docker container to run Synthea, avoiding the need for local Java dependencies.
+We use a unified script that enforces the **Seed 42** reproducibility standards for the project.
 
-To generate the initial 1,000 patient cohort, use the provided script:
+`ash
+# Default: 1,000 patients with seed 42
+./scripts/generate_data.sh
+
+# Scale to 10,000 patients
+./scripts/generate_data.sh -p 10000
+`
+
+The data will be saved to data/raw/synthea_<count>/.
+
+## Controlled Perturbations
+
+For Explainable AI validation, we inject controlled perturbations (lab noise and order variability) into the baseline cohort using a post-processing script.
 
 ```bash
-# Build the Docker image and generate data
-./scripts/generate_cohort.sh
+# Activate virtual environment
+source .venv/Scripts/activate
+
+# Run perturbation pipeline
+python src/pipeline/perturb_cohort.py
 ```
 
-The generated data (CSV/JSON files) will automatically be saved to `data/raw/synthea/`.
+This will:
+1. Inject Gaussian noise into numerical `Observation` resources.
+2. Randomly drop or duplicate `MedicationRequest` entries.
+3. Generate a `ground_truth_perturbations.json` answer key in `data/processed/`.
+4. Modify the FHIR bundles in-place within `data/raw/synthea_10k/`.
+
+## Reproducibility & Seeds
+
+To ensure the research results are consistent across the team, we use fixed random seeds for both generation and perturbation:
+- **Synthea Seed**: `42` (set in `generate_10k_baseline.ps1`)
+- **Perturbation Seed**: `42` (set in `perturb_cohort.py`)
+
+Due to disk space constraints, perturbations are applied **in-place** to the baseline data. The small `ground_truth_perturbations.json` file serves as the versioned record of all injected anomalies.
 
 ## Team
 
 - Andy Behrens (PI) - Dakota State University
 - Abem Woldesenbet - Dakota State University
 - Daun Davids - Dakota State University
+
+
