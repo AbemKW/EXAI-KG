@@ -2,6 +2,7 @@
 data/raw/
 data/processed/
 data/synthea_output/
+data/vocab/
 *.fhir
 *.ndjson
 
