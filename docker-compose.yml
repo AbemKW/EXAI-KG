@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: exai-kg-postgres
+    environment:
+      POSTGRES_DB: omop_cdm
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  etl-synthea:
+    build: ./tools/etl-synthea
+    container_name: exai-kg-etl
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PG_HOST: postgres
+      PG_PORT: "5432"
+      PG_DB: omop_cdm
+      PG_USER: postgres
+      PG_PASSWORD: postgres
+      CDM_SCHEMA: cdm_synthea
+      SYNTHEA_SCHEMA: native_synthea
+      SYNTHEA_FILE_LOC: /data/synthea_csv
+      VOCAB_FILE_LOC: /data/vocab
+      CDM_VERSION: "5.4"
+      SYNTHEA_VERSION: "3.2.0"
+    volumes:
+      - ./data/raw/synthea_1k_csv/csv:/data/synthea_csv:ro
+      - ./data/vocab:/data/vocab:ro
+    profiles:
+      - etl
+
+volumes:
+  postgres_data:
