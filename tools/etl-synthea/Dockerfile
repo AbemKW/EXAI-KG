@@ -1,6 +1,7 @@
 FROM rocker/r-ver:4.3.0
 
 RUN apt-get update && apt-get install -y \
+    default-jdk \
     libpq-dev \
     libssl-dev \
     libcurl4-openssl-dev \
