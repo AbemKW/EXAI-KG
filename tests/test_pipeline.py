@@ -52,3 +52,28 @@ def test_person_count_matches_native_patients(conn):
     assert cdm_count == native_count, (
         f"cdm_synthea.person ({cdm_count}) != native_synthea.patients ({native_count})"
     )
+
+import os
+import pandas as pd
+
+PARQUET_DIR = "data/processed/omop_parquet"
+
+EXPECTED_PARQUET = [
+    "person.parquet",
+    "condition_occurrence.parquet",
+    "drug_exposure.parquet",
+    "measurement.parquet",
+    "observation.parquet",
+    "visit_occurrence.parquet",
+]
+
+@pytest.mark.parametrize("filename", EXPECTED_PARQUET)
+def test_parquet_file_exists(filename):
+    assert os.path.exists(os.path.join(PARQUET_DIR, filename)), \
+        f"Missing: {PARQUET_DIR}/{filename}"
+
+def test_person_parquet_row_count(conn):
+    df = pd.read_parquet(f"{PARQUET_DIR}/person.parquet")
+    cur = conn.cursor()
+    cur.execute(f"SELECT COUNT(*) FROM {CDM_SCHEMA}.person")
+    assert len(df) == cur.fetchone()[0]
