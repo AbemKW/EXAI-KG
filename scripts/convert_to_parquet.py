@@ -25,7 +25,7 @@ CDM_TABLES = [
     "observation_period",
 ]
 
-OUTPUT_DIR = Path("data/processed/omop_parquet")
+OUTPUT_DIR = Path(__file__).parent.parent / "data" / "processed" / "omop_parquet"
 
 
 def export_table(conn, schema: str, table: str, output_dir: Path):

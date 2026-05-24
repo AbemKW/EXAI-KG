@@ -29,6 +29,7 @@ docker compose exec postgres sh -c "until pg_isready -U postgres; do sleep 1; do
 echo "[3/4] Running ETL-Synthea..."
 docker compose --profile etl run --rm \
   -v "$(pwd)/$OUTPUT_DIR/csv:/data/synthea_csv:ro" \
+  -e SYNTHEA_FILE_LOC=/data/synthea_csv \
   etl-synthea
 
 echo "[4/4] Validating OMOP output..."

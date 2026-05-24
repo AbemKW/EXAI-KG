@@ -37,7 +37,6 @@ services:
       CDM_VERSION: "5.4"
       SYNTHEA_VERSION: "3.2.0"
     volumes:
-      - ./data/raw/synthea_1k_csv/csv:/data/synthea_csv:ro
       - ./data/vocab:/data/vocab:ro
     profiles:
       - etl
