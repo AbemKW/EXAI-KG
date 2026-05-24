@@ -35,7 +35,7 @@ services:
       SYNTHEA_FILE_LOC: /data/synthea_csv
       VOCAB_FILE_LOC: /data/vocab
       CDM_VERSION: "5.4"
-      SYNTHEA_VERSION: "3.2.0"
+      SYNTHEA_VERSION: "3.3.0"
     volumes:
       - ./data/vocab:/data/vocab:ro
     profiles:

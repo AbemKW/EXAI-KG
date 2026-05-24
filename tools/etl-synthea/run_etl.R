@@ -12,7 +12,7 @@ synthea_schema   <- Sys.getenv("SYNTHEA_SCHEMA",   "native_synthea")
 synthea_file_loc <- Sys.getenv("SYNTHEA_FILE_LOC", "/data/synthea_csv")
 vocab_file_loc   <- Sys.getenv("VOCAB_FILE_LOC",   "/data/vocab")
 cdm_version      <- Sys.getenv("CDM_VERSION",      "5.4")
-synthea_version  <- Sys.getenv("SYNTHEA_VERSION",  "3.2.0")
+synthea_version  <- Sys.getenv("SYNTHEA_VERSION",  "3.3.0")
 
 cat("Connecting to PostgreSQL at", pg_host, "...\n")
 
