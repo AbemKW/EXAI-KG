@@ -36,6 +36,7 @@ experiments/checkpoints/
 # Claude Code (personal setup, not team tooling)
 .claude/
 CLAUDE.md
+session-log.md
 
 # OS
 .DS_Store
