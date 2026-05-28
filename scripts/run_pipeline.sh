@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+export MSYS_NO_PATHCONV=1
+
 PATIENTS=1000
 SEED=42
 

@@ -4,6 +4,10 @@ services:
   postgres:
     image: postgres:15
     container_name: exai-kg-postgres
+    command: >
+      postgres
+      -c work_mem=512MB
+      -c maintenance_work_mem=1GB
     environment:
       POSTGRES_DB: omop_cdm
       POSTGRES_USER: postgres
