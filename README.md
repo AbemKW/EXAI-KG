@@ -1,79 +1,58 @@
-# EXAI-KG
+# EXAI-KG — Phase 1: OMOP CDM ETL Pipeline
 
-Explainable AI with Knowledge Graphs applied to synthetic healthcare data.
+Transforms Synthea synthetic patient data into OMOP CDM format for downstream knowledge graph construction.
 
-This project builds an explainable AI pipeline over a knowledge graph constructed
-from Synthea-generated synthetic patient records. The initial phase runs on CPU and
-targets a conference paper. A GPU benchmarking phase follows, contingent on NVIDIA
-grant funding, targeting a journal publication.
+## Pipeline
 
-## Project structure
+Synthea (Docker) → CSV → ETL-Synthea (Docker, R) → PostgreSQL OMOP CDM → Parquet
 
-```
-data/           # Synthea outputs and processed records (gitignored)
-notebooks/      # Exploratory analysis
-src/
-  kg/           # Knowledge graph construction
-  xai/          # Explainability components
-  pipeline/     # End-to-end pipeline orchestration
-experiments/    # Results and benchmark outputs
-references/     # Papers and design docs (gitignored)
-```
+## Prerequisites
+
+- Docker + Docker Compose
+- Python 3.9+ with venv
+- OMOP Vocabulary files in `data/vocab/` (download from https://athena.ohdsi.org)
 
 ## Setup
 
-Requires Python 3.10+ (Java is no longer required on the host machine).
-
 ```bash
 python -m venv .venv
-source .venv/Scripts/activate   # Windows (Git Bash)
+source .venv/Scripts/activate   # Windows Git Bash
 pip install -r requirements.txt
 ```
 
-## Generating synthetic data
-
-We use a unified script that enforces the **Seed 42** reproducibility standards for the project.
-
-`ash
-# Default: 1,000 patients with seed 42
-./scripts/generate_data.sh
-
-# Scale to 10,000 patients
-./scripts/generate_data.sh -p 10000
-`
-
-The data will be saved to data/raw/synthea_<count>/.
-
-## Controlled Perturbations
-
-For Explainable AI validation, we inject controlled perturbations (lab noise and order variability) into the baseline cohort using a post-processing script.
+## Running the pipeline
 
 ```bash
-# Activate virtual environment
-source .venv/Scripts/activate
+# Full end-to-end (1k patients, seed 42)
+./scripts/run_pipeline.sh
 
-# Run perturbation pipeline
-python src/pipeline/perturb_cohort.py
+# Custom run
+./scripts/run_pipeline.sh -p 5000 -s 99
+
+# After pipeline: export to Parquet
+python scripts/convert_to_parquet.py
 ```
 
-This will:
-1. Inject Gaussian noise into numerical `Observation` resources.
-2. Randomly drop or duplicate `MedicationRequest` entries.
-3. Generate a `ground_truth_perturbations.json` answer key in `data/processed/`.
-4. Modify the FHIR bundles in-place within `data/raw/synthea_10k/`.
+## Validating
 
-## Reproducibility & Seeds
+```bash
+# Standalone validator (prints OK/WARN/FAIL per table)
+python scripts/validate_omop.py
 
-To ensure the research results are consistent across the team, we use fixed random seeds for both generation and perturbation:
-- **Synthea Seed**: `42` (set in `generate_10k_baseline.ps1`)
-- **Perturbation Seed**: `42` (set in `perturb_cohort.py`)
+# Full pytest suite
+pytest tests/test_pipeline.py -v
+```
 
-Due to disk space constraints, perturbations are applied **in-place** to the baseline data. The small `ground_truth_perturbations.json` file serves as the versioned record of all injected anomalies.
+## Data layout
 
-## Team
+```
+data/
+  raw/synthea_1k_csv/csv/   # Synthea CSV output (gitignored)
+  vocab/                    # OMOP vocabulary files (gitignored)
+  processed/omop_parquet/   # Parquet export (gitignored)
+```
 
-- Andy Behrens (PI) - Dakota State University
-- Abem Woldesenbet - Dakota State University
-- Daun Davids - Dakota State University
+## Schemas
 
-
+- `native_synthea` — raw Synthea tables loaded by ETL-Synthea
+- `cdm_synthea` — OMOP CDM v5.4 tables populated by ETL-Synthea

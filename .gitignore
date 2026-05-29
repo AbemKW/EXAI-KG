@@ -2,6 +2,7 @@
 data/raw/
 data/processed/
 data/synthea_output/
+data/vocab/
 *.fhir
 *.ndjson
 
@@ -35,6 +36,7 @@ experiments/checkpoints/
 # Claude Code (personal setup, not team tooling)
 .claude/
 CLAUDE.md
+session-log.md
 
 # OS
 .DS_Store
