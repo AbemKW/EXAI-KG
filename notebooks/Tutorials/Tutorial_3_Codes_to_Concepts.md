@@ -1,7 +1,7 @@
 # Tutorial 3 — Codes to Concepts
 
 *EXAI-KG hands-on series · for new interns · ~50 min*
-*Companion to `Intern_Onboarding_Plan.md` (Tier B — the core). Goal: understand how a raw medical code becomes a **standard concept**, why each clinical domain uses a **different vocabulary**, and prove to yourself what **entity normalization** (the shared Concept node) actually buys the project. This is the tutorial that makes you fluent in the language the data is written in.*
+*Goal: understand how a raw medical code becomes a **standard concept**, why each clinical domain uses a **different vocabulary**, and prove to yourself what **entity normalization** (the shared Concept node) actually buys the project. This is the tutorial that makes you fluent in the language the data is written in.*
 
 In Tutorials 1–2 you used a quick `id → name` lookup and moved on. Now we slow down and look at the vocabulary layer itself, because **the shared Concept node is the single idea the whole knowledge graph stands on** — and the Tier B gate is built to check that you get it.
 

@@ -1,7 +1,4 @@
-# PRD — EXAI-KG Phase 2 Node/Edge Taxonomy (v0, for sign-off)
-
-**Author:** Daun Davids · **Date:** June 7, 2026 · **For:** June 8 team sync (Phase 2 launch)
-**Status:** Draft for review — not the deliverable yet. This is the plan for the deliverable.
+# PRD — EXAI-KG Phase 2 Node/Edge Taxonomy DRAFT
 
 ---
 
@@ -15,7 +12,7 @@ assumptions and won't line up.
 
 ## Why this matters / what's new here
 
-Two source papers anchor the work, but neither is a drop-in:
+Currently, two source papers anchor this work, but neither is a drop-in:
 
 - **Panagiotakis et al.** ("Unlocking Healthcare Insights") — Synthea → Neo4j. Gives the concrete
   table→node / join→edge recipe and battle-tested modeling rules. But their graph is **static** (one
@@ -27,7 +24,7 @@ Two source papers anchor the work, but neither is a drop-in:
 **The EXAI-KG twist:** our thesis (manuscript RQ1–RQ2) is that *topology changing over time* is the
 explainability signal. So our taxonomy must designate a **temporal backbone** — the ordered chain of a
 single patient's encounters/events — because that's the structure we snapshot and measure. That temporal
-dimension is the part we're adding on top of both papers.
+dimension is the part we're adding on top of those papers.
 
 ## Success criteria
 
@@ -37,7 +34,7 @@ A taxonomy document that:
 3. Marks which edges are **temporal** (the backbone) vs **descriptive**.
 4. States, for each topology metric in Phase 2, which nodes/edges it operates on — so my metric code and
    Abem's builder share one contract.
-5. Is concrete enough that Abem can start the Wk4 edge-list generator from it without guessing.
+5. Is concrete enough that Abem can start the edge-list generator from it without guessing.
 
 ## Scope
 
@@ -49,7 +46,7 @@ plus shared vocabulary Concept nodes. Property-graph model (NetworkX-compatible)
 phase — these come later). RDF/FHIR semantic layer (Xiao-style) — note as a future option, don't build it
 now. Provider/care_site nodes — propose deferring unless the team wants referral analysis early.
 
-## Proposed taxonomy (draft — react to this)
+## Proposed taxonomy (draft)
 
 **Node types**
 
@@ -88,7 +85,7 @@ each snapshot to produce the entropy-over-time, branching, and centrality-shift 
   properties/node; avoid `is_a`/`type_of` edges; avoid high-density nodes (path explosion).
 - Build from the OMOP tables already in `main`; don't require re-running the ETL.
 
-## Open questions for the team (June 8)
+## Open questions for the team 
 
 1. **Granularity** — one node per raw event (high fidelity, denser graph) vs aggregated patient-state
    nodes? This is the biggest modeling fork and directly changes what entropy/branching even measure.
@@ -105,7 +102,7 @@ each snapshot to produce the entropy-over-time, branching, and centrality-shift 
 
 ## Plan (after sign-off)
 
-1. Lock node/edge tables from feedback above (~30 min).
+1. Lock node/edge tables from feedback above.
 2. Expand each into the full taxonomy doc: properties per node, the metric→structure contract, a small
-   worked example for one synthetic patient (~1–1.5 hr).
-3. Hand to Abem as the spec for the Wk4 edge-list generator.
+   worked example for one synthetic patient.
+3. Hand to Abem as the spec for the edge-list generator.

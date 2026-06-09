@@ -1,7 +1,8 @@
 # Tutorial 4 — Build a Tiny Graph
 
 *EXAI-KG hands-on series · for new interns · ~70 min*
-*Companion to `Intern_Onboarding_Plan.md` (Tier C entry). Goal: turn patient 403 from a pile of OMOP rows into an actual **knowledge graph** — nodes and edges in NetworkX — by following the project's real edge contract (`Phase2_Taxonomy_FULL.md` §5). This is the first tutorial where you **build** instead of query.*
+
+*Goal: turn patient 403 from a pile of OMOP rows into an actual **knowledge graph** — nodes and edges in NetworkX — by following the project's real edge contract (`Phase2_Taxonomy_FULL.md` §5). This is the first tutorial where you **build** instead of query.*
 
 Everything so far was preparation. You've read the tables, decoded the vocabularies, and seen the shared Concept node. Now you assemble them into the thing the whole project is about. We'll build **one static graph** for one patient — no time dimension yet (that's the unsolved frontier; see the end).
 

@@ -1,7 +1,8 @@
 # Tutorial 2 — Follow One Patient
 
-*EXAI-KG hands-on series · for new interns · ~50 min*
-*Companion to `Intern_Onboarding_Plan.md` (Tier A). Goal: assemble one patient's entire medical history out of the scattered OMOP tables, see the **`NEXT_ENCOUNTER` time backbone** with your own eyes, and watch the **sepsis moment** appear in the middle of a real life story.*
+*EXAI-KG hands-on series · for new interns*
+
+*Goal: assemble one patient's entire medical history out of the scattered OMOP tables, see the **`NEXT_ENCOUNTER` time backbone** with your own eyes, and watch the **sepsis moment** appear in the middle of a real life story.*
 
 Tutorial 1 gave you the bird's-eye view of all 1,174 patients. Now we go deep on exactly one — **person_id 403** — because the knowledge graph you'll build in Tutorial 4 is, at its core, *one patient's timeline turned into nodes and edges*. You can't model a trajectory you haven't read.
 

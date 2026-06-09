@@ -1,7 +1,8 @@
 # Tutorial 6 — The Temporal Frontier
 
 *EXAI-KG hands-on series · for new interns · ~60 min, mostly thinking*
-*Companion to `Intern_Onboarding_Plan.md` (the deferred open question). Goal: see the project's core thesis demonstrated on real data, then understand **exactly what the team hasn't decided yet** — well enough to have an opinion. This is the tutorial that turns you from someone who can follow the project into someone who can help **decide** it.*
+
+*Goal: see the project's core thesis demonstrated on real data, then understand **exactly what the team hasn't decided yet** — well enough to have an opinion. This is the tutorial that turns you from someone who can follow the project into someone who can help **decide** it.*
 
 This one is different. Tutorials 1–5 had right answers you could check. This one doesn't, because **the project itself doesn't have them yet.** You've earned your way here by building and measuring a static graph; now you meet the unsolved part.
 

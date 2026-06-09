@@ -1,9 +1,7 @@
 # Tutorial 1 — Meet Your Dataset
 
-*EXAI-KG hands-on series · for new interns · ~45 min*
-*Companion to `Intern_Onboarding_Plan.md` (Tier A). Goal: get comfortable opening the real OMOP data, tell **events** apart from **people**, and find the **sepsis cohort** the whole project is built to study.*
-
-By the end you'll be able to answer the Tier A gate questions from memory — because you'll have seen the answers in the data yourself.
+*EXAI-KG hands-on series · for new interns*
+*Goal: get comfortable opening the real OMOP data, tell **events** apart from **people**, and find the **sepsis cohort** the whole project is built to study.*
 
 ---
 
@@ -11,7 +9,7 @@ By the end you'll be able to answer the Tier A gate questions from memory — be
 
 **What you need**
 - A working clone of the `AbemKW_EXAI-KG` repo with the Phase 1 output (the `.parquet` files).
-- Python 3 with `pandas` and `pyarrow` (`pip install pandas pyarrow`).
+- Python 3 with `pandas` and `pyarrow` (`pip install pandas pyarrow`). Added to requirements.txt for this project.
 - The three data folders (paths will differ on your machine — set them once below):
   - `data/processed/omop_parquet/` — the 8 OMOP tables (what we mostly use)
   - `data/vocab/` — the vocabulary CSVs, including `CONCEPT.csv`

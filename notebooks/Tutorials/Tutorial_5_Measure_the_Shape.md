@@ -1,7 +1,8 @@
 # Tutorial 5 — Measure the Shape
 
 *EXAI-KG hands-on series · for new interns · ~70 min*
-*Companion to `Intern_Onboarding_Plan.md` (Tier C). Goal: compute the project's four **topology metrics** — centrality, branching, entropy, motif — on the graph you built in Tutorial 4, learn to read **structure as signal**, and — just as important — learn to be **skeptical**, because not every metric actually means something.*
+
+*Goal: compute the project's four **topology metrics** — centrality, branching, entropy, motif — on the graph you built in Tutorial 4, learn to read **structure as signal**, and — just as important — learn to be **skeptical**, because not every metric actually means something.*
 
 The project's whole bet is that the *shape* of a patient's graph carries clinical meaning — that you can see trouble in the topology before any model makes a prediction. This tutorial is where you test that bet with your own hands, on real numbers. We compute each metric on **patient 403** (rich: 94 visits) and a **simple patient, 183** (a handful of visits), and ask: *does the metric tell them apart?*
 

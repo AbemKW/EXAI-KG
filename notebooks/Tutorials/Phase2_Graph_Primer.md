@@ -1,8 +1,5 @@
 # EXAI-KG — Plain-English Primer on the Graph Concepts
 
-*A cheat sheet for the June 8 sync. Goal: you can follow and contribute even if Andy or Abem dives into
-the technical weeds. Nothing here assumes prior graph theory.*
-
 ---
 
 ## 1. What a graph actually is
@@ -35,7 +32,7 @@ the reasoning, not a score bolted on afterward.
 Naively, you'd give every patient their own "Type 2 Diabetes" node. With 50,000 patients that's 50,000
 diabetes nodes that never connect to each other — useless for finding patterns.
 
-Instead we keep **one** "Type 2 Diabetes" Concept node, and every patient who has it points to that same
+Instead, we keep **one** "Type 2 Diabetes" Concept node, and every patient who has it points to that same
 node (an edge `MAPS_TO`). Now the graph can answer "who clusters around diabetes?" and "is diabetes a hub
 connecting many other conditions?" This is **entity normalization** (Panagiotakis Step 2), and it's what
 makes the topology metrics below mean anything. The Concept nodes come from medical vocabularies — SNOMED
@@ -61,9 +58,9 @@ We measure the *shape* of each snapshot and watch how those numbers move. A grap
 and tangles may signal a patient (or a clinician's decision space) heading toward **overload** — and we'd
 see it in the structure, before any prediction is made. That's the explainability signal.
 
-> **One honest caveat to raise tomorrow:** "a snapshot" needs a definition — per visit? per week? — and
+> **Questions:** "a snapshot" needs a definition — per visit? per week? — and
 > "what counts as one node" (every raw event, or a summarized patient-state?) is undecided. The metrics
-> below are undefined until the team picks these. Bring them as questions, not answers.
+> below are undefined until the team picks these. 
 
 ## 5. The four topology metrics — what they actually measure
 
@@ -98,11 +95,8 @@ center everything else connects through. That hand-off is often the clinically i
 | topology | the *shape* of the network |
 | NetworkX | the CPU Python library we use (GPU version later = cuGraph) |
 
-## 7. Three things you can say tomorrow and be exactly right
 
-1. "I modeled the taxonomy off Panagiotakis for the table→node mapping and Xiao for the OMOP semantic
-   layer, but added a temporal backbone since our thesis is topology *over time*."
-2. "Before we build, we need to lock two things: the snapshot interval and event granularity — the metrics
-   are undefined without them."
-3. "On CPT4: I'd skip it for the synthetic prototype but apply for the UMLS license now, since approval is
-   slow and the VA real-world data will need it."
+1. Before we build, we need to lock two things: the snapshot interval and event granularity — the metrics
+   are undefined without them.
+2. On CPT4: I'd skip it for the synthetic prototype but apply for the UMLS license now, since approval is
+   slow and the VA real-world data will need it.
