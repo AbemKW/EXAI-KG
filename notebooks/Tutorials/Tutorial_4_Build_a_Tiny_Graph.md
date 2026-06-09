@@ -6,7 +6,7 @@
 
 Everything so far was preparation. You've read the tables, decoded the vocabularies, and seen the shared Concept node. Now you assemble them into the thing the whole project is about. We'll build **one static graph** for one patient — no time dimension yet (that's the unsolved frontier; see the end).
 
-**Setup:** same header, plus NetworkX (`pip install networkx matplotlib`).
+**Setup:** same header, plus NetworkX and Matplotlib — both are in `requirements.txt` for this project. If you set up the venv with `pip install -r requirements.txt`, they are already available.
 
 ```python
 import pandas as pd, networkx as nx
