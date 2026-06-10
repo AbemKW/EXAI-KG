@@ -1,0 +1,172 @@
+# Tutorial 3 — Codes to Concepts
+
+*EXAI-KG hands-on series · for new interns · ~50 min*
+*Goal: understand how a raw medical code becomes a **standard concept**, why each clinical domain uses a **different vocabulary**, and prove to yourself what **entity normalization** (the shared Concept node) actually buys the project. This is the tutorial that makes you fluent in the language the data is written in.*
+
+In Tutorials 1–2 you used a quick `id → name` lookup and moved on. Now we slow down and look at the vocabulary layer itself, because **the shared Concept node is the single idea the whole knowledge graph stands on** — and the Tier B gate is built to check that you get it.
+
+**Setup:** same header as before.
+
+```python
+import pandas as pd
+from pathlib import Path
+OMOP  = Path(r"W:\dev\EXAI-KG-OMOP\EXAI-KG\data\processed\omop_parquet")
+VOCAB = Path(r"W:\dev\EXAI-KG-OMOP\EXAI-KG\data\vocab")
+def load(t): return pd.read_parquet(OMOP / f"{t}.parquet")
+```
+
+---
+
+## Step 0 — Don't load 900 MB you don't need (a real engineering lesson)
+
+Your instinct might be `pd.read_csv(VOCAB / "CONCEPT.csv")`. **Don't.** That file is ~6.6 million rows and ~900 MB; loading it whole will exhaust memory on a normal laptop and crash your kernel. (Ask me how I know.)
+
+The professional move: figure out which concept ids you actually need (this dataset uses only ~1,000 of the 6.6 million), then fetch *only those*. Here's a reusable helper:
+
+```python
+def concept_lookup(ids):
+    """Return a small DataFrame of just the concept rows we need."""
+    want = set(int(i) for i in ids if pd.notna(i))
+    rows, cols = [], ["concept_id","concept_name","domain_id","vocabulary_id","standard_concept","concept_code"]
+    for chunk in pd.read_csv(VOCAB / "CONCEPT.csv", sep="\t", usecols=cols,
+                             dtype=str, chunksize=500_000):
+        chunk["concept_id"] = chunk["concept_id"].astype(int)
+        rows.append(chunk[chunk.concept_id.isin(want)])
+    return pd.concat(rows, ignore_index=True)
+```
+
+Reading in **chunks** keeps memory flat — you never hold more than 500k rows at once. This pattern (filter while streaming, never load the whole thing) is one you'll reuse constantly with big reference files.
+
+> **Lesson:** "just load it into pandas" stops working at scale. Knowing *what* you need and fetching only that is half of real data engineering.
+
+---
+
+## Step 1 — Two layers: the source code vs. the standard concept
+
+Every clinical event in OMOP carries its diagnosis/drug/lab in **two forms**:
+
+- **`*_source_value`** — the original code, exactly as the source system wrote it.
+- **`*_source_concept_id`** — that original code, as an OMOP concept.
+- **`*_concept_id`** — the **standard** concept OMOP maps it to. *This is the one everything should use.*
+
+Look at a real sepsis row:
+
+```python
+co = load("condition_occurrence")
+s  = co[co.condition_concept_id == 132797].iloc[0]
+look = concept_lookup([s.condition_source_concept_id, s.condition_concept_id])
+look = look.set_index("concept_id")
+
+print("raw source code :", s.condition_source_value)
+print("source concept  :", int(s.condition_source_concept_id), look.loc[int(s.condition_source_concept_id), ["concept_name","vocabulary_id","standard_concept"]].tolist())
+print("STANDARD concept:", int(s.condition_concept_id),        look.loc[int(s.condition_concept_id),        ["concept_name","vocabulary_id","standard_concept"]].tolist())
+```
+
+```
+raw source code : 91302008
+source concept  : 132797 ['Sepsis', 'SNOMED', 'S']
+STANDARD concept: 132797 ['Sepsis', 'SNOMED', 'S']
+```
+
+Here the source and standard concept are **identical** (`132797`, both flagged `standard_concept = 'S'`). That's not a coincidence — it's a fact about Synthea you need to know (Step 4).
+
+> **The `standard_concept` flag:** `'S'` = standard (use it as a node), `'C'` = a classification/grouper, blank = non-standard (a source code that *should* be mapped to a standard one). Your graph's Concept nodes should always be `'S'`.
+
+---
+
+## Step 2 — Each domain speaks a different vocabulary
+
+A diagnosis, a drug, and a lab are coded in *different* vocabularies. Knowing which is which is core Tier B fluency. Check it across every event table:
+
+```python
+# gather the standard concept ids actually used, look them up once
+cols = {"condition_occurrence":"condition_concept_id","drug_exposure":"drug_concept_id",
+        "measurement":"measurement_concept_id","procedure_occurrence":"procedure_concept_id",
+        "observation":"observation_concept_id"}
+all_ids = set()
+for t,c in cols.items(): all_ids |= set(load(t)[c].unique())
+vocab = concept_lookup(all_ids).set_index("concept_id")["vocabulary_id"]
+
+for t,c in cols.items():
+    vc = load(t)[c].map(vocab).value_counts().head(3)
+    print(f"{t:24s}: " + ", ".join(f"{k} {v:,}" for k,v in vc.items()))
+```
+
+```
+condition_occurrence    : SNOMED 15,976
+drug_exposure           : RxNorm 55,342, CVX 14,933
+measurement             : LOINC 532,587, SNOMED 42,454
+procedure_occurrence    : SNOMED 104,078
+observation             : LOINC 273,911, SNOMED 25,365
+```
+
+Read it off and memorize the pattern:
+
+| Domain | Vocabulary | 
+|---|---|
+| Conditions (diagnoses) | **SNOMED** |
+| Drugs | **RxNorm** (+ **CVX** for vaccines) |
+| Measurements (labs/vitals) | **LOINC** (+ some SNOMED) |
+| Procedures | **SNOMED** here (real data often uses **CPT4/HCPCS**) |
+| Observations | **LOINC** + SNOMED |
+
+This is exactly why "map a lab to RxNorm" is a red-flag answer on the Tier B gate — labs are **LOINC**. Different domain, different vocabulary.
+
+---
+
+## Step 3 — Entity normalization, proven (the heart of Tier B)
+
+Here's the idea the whole graph depends on. The naive design gives every patient their *own* "Gingivitis" node — thousands of disconnected duplicates. **Entity normalization** instead points every gingivitis event at **one shared Concept node**. Prove the payoff with real numbers:
+
+```python
+look = concept_lookup([132797, 4281516]).set_index("concept_id")["concept_name"]
+for cid in [132797, 4281516]:
+    sub = co[co.condition_concept_id == cid]
+    print(f"{look[cid]:12s} (concept {cid}): {len(sub):>5,} event rows  across {sub.person_id.nunique():>4,} patients  -> 1 shared node")
+```
+
+```
+Sepsis       (concept 132797):    33 event rows  across   33 patients  -> 1 shared node
+Gingivitis   (concept 4281516): 3,098 event rows  across  957 patients  -> 1 shared node
+```
+
+Sit with the gingivitis line: **3,098 separate diagnosis events, belonging to 957 different patients, all pointing at one node.** *That* is what makes graph questions possible:
+
+- "How many patients cluster around gingivitis?" → count edges into one node (957), instead of hunting 3,098 scattered duplicates.
+- "Is sepsis a hub that connects otherwise-unrelated patients?" → only askable because all 33 sepsis events share a node.
+
+Without normalization, those 3,098 events never touch each other and the topology metrics (centrality, community) measure nothing. **The shared node is what turns a pile of events into a network.** In the graph you build next tutorial, this is the `MAPS_TO` edge — every event node → its one shared Concept.
+
+---
+
+## Step 4 — The CPT4/UMLS gap: why it's invisible here but real on real data
+
+The project docs warn about a vocabulary gap. Now you can see *exactly* why it doesn't show up in this dataset — and why it will on real data.
+
+**Fact 1 — Synthea is pre-standardized.** Check how often the source code and the standard concept actually differ:
+
+```python
+d = (co.condition_concept_id != co.condition_source_concept_id).mean()
+print(f"conditions where standard != source: {d:.1%}")
+```
+
+```
+conditions where standard != source: 0.0%
+```
+
+**Zero.** Synthea already emits standard SNOMED/RxNorm/LOINC codes, so the source→standard mapping is essentially the identity. On *real* hospital data — where diagnoses arrive as ICD-9/ICD-10 and have to be remapped to SNOMED — this number would be huge. You're seeing an easy case; don't mistake it for the normal case.
+
+**Fact 2 — the procedures are all SNOMED, so CPT4 never bites here.** From Step 2, `procedure_occurrence` is 100% SNOMED and (from Tutorial 1) 0% unmapped. The CPT4/UMLS problem is this: **real** procedure/claims data is coded in **CPT4**, and loading CPT4 into OMOP requires a **UMLS license** (slow to get). Without it, those procedures map to `concept_id = 0` — no Concept node, a hole in the graph. Synthea sidesteps the whole thing by using SNOMED, so:
+
+> **The gap is a forward risk, not a present defect.** It's the right thing to flag for the VA real-world data phase, and the wrong thing to claim you can see in the Synthea graph today. (This is the empirical note now in `Phase2_Graph_Primer.md`.)
+
+---
+
+## Checkpoint — you can now answer the Tier B gate
+
+- **What is entity normalization, and why does the shared Concept node matter?** → collapsing per-patient duplicates into one shared node (Step 3: 3,098 gingivitis events / 957 patients → 1), which is what makes cross-patient centrality/community analysis possible. Without it the metrics measure nothing.
+- **Which vocabulary for which domain?** → conditions SNOMED, drugs RxNorm/CVX, labs LOINC, procedures SNOMED-here/CPT4-on-real-data (Step 2).
+- **Source vs. standard concept?** → always build on the standard `*_concept_id` (`'S'`); the source layer is the original code (Step 1).
+- **The CPT4/UMLS gap?** → invisible here (Synthea uses SNOMED, 0 unmapped), a real risk on CPT4-coded real data (Step 4).
+
+**Next:** *Tutorial 4 — Build a Tiny Graph.* You'll take patient 403 from Tutorial 2 and turn her records into actual nodes and edges in NetworkX — where the `MAPS_TO` pointers you studied here become the edges that hold the network together.
