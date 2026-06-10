@@ -35,7 +35,7 @@ So why isn't the project done? Because that curve rests on a stack of choices no
 I made at least four choices to draw that chart. Change any one and the curve changes:
 
 1. **Cumulative vs. windowed.** I let the graph *accumulate* (everything up to year Y). A *sliding window* (only the last 12 months) would show a very different shape — entropy would fall during quiet years instead of plateauing.
-2. **Per-year snapshots.** I snapshotted yearly. Per-*encounter* (the PRD's tentative default) would give 94 points instead of 19, with different dynamics. Per-*week* would be different again — and mostly empty.
+2. **Per-year snapshots.** I snapshotted yearly. Per-*encounter* (the locked v1 approach) would give 94 points instead of 19, with different dynamics. Per-*week* would be different again — and mostly empty.
 3. **Entropy of what?** I used the mix of *edge types*. Entropy of the *degree distribution*, or of *concept domains*, would each tell a different story.
 4. **Hub = raw event count.** The "hub" was just the most-pointed-to concept. Early on that's "Risk activity involvement" — a routine screening observation that's frequent but not clinically central. A different centrality measure (betweenness, PageRank) might never call it the hub.
 
@@ -45,15 +45,23 @@ I made at least four choices to draw that chart. Change any one and the curve ch
 
 ## Step 3 — The real open forks (now you can reason about them)
 
-These are the decisions on the table (`Phase2_Taxonomy_PRD.md` open questions, the worklog). You now know enough to form a view on each.
+These were the decisions on the table when this tutorial was written. **Forks 1–3 were locked by Andy in a team email on 2026-06-09.** Fork 4 was resolved by a full research reframe in the same email. The decisions and rationale are noted under each fork below — understanding *why* each was decided is as important as knowing what was decided.
 
 **Fork 1 — Event granularity (D1).** One node per *raw event*, or aggregate into *patient-state* nodes per timestep? You felt this in Tutorial 4: raw events made one patient a 1,056-node graph, dominated by hundreds of measurements and observations. That's why 403's early "hub" was a screening observation — sheer volume, not importance. Aggregation would shrink the graph and might sharpen the signal — or wash it out. *This single choice changes what entropy and centrality even measure.*
 
-**Fork 2 — Snapshot interval (D2).** Per-encounter, fixed window, or cumulative? Entropy-over-time is **undefined** until this is set — you saw three different possible curves in Step 2. The PRD leans per-encounter (it matches the `NEXT_ENCOUNTER` backbone); is that right for a metric meant to catch *gradual* overload?
+> **Decision (2026-06-09): raw event nodes.** Entropy and branching signals live at the event level. Aggregation destroys the fidelity we need — we can always aggregate up analytically, but we cannot reconstruct granularity from collapsed states.
+
+**Fork 2 — Snapshot interval (D2).** Per-encounter, fixed window, or cumulative? Entropy-over-time is **undefined** until this is set — you saw three different possible curves in Step 2. This is also what determines whether the metrics can track gradual pathway complexity shifts vs. point-in-time snapshots.
+
+> **Decision (2026-06-09): encounter-based timesteps.** Encounters are the natural unit of clinical decision-making and match how providers experience the decision sequence. Fixed calendar windows are analytically convenient but clinically arbitrary. Revisit only if the VA cohort structure demands fixed windows.
 
 **Fork 3 — Property graph now, RDF/FHIR later?** You built in NetworkX (property graph). Xiao's FHIR-RDF approach is richer but heavier. For the CPU prototype, is the simpler model enough?
 
-**Fork 4 — What does "overload" even mean?** This is the deepest one. `Grounding_Map.md` flags it: the project says "**cognitive** overload" (the clinician's mental load) but the injected perturbation models a **system** delay (a lab queue backing up). Those aren't the same thing. The term drifts across the team's own documents. Until it's pinned down, you can't say what the topology is supposed to be detecting. *An intern who notices this slippage is already contributing.*
+> **Decision (2026-06-09): NetworkX (property graph) for v1; RDF/FHIR deferred.** The FHIR-RDF semantic layer is out of scope for the synthetic prototype.
+
+**Fork 4 — What does "overload" even mean?** This was the deepest one. Earlier project documents drifted between "**cognitive** overload" (the clinician's mental load) and a **system** delay (a lab queue backing up). Those aren't the same thing, and the topology can't detect both at once.
+
+> **Reframe (2026-06-09): the project is no longer framed around "overload."** Andy reframed the central research question as: *Does pathway complexity predict provider override behavior? Does surfacing graph structure change it?* The topology metrics are now measuring *pathway complexity as a predictor of resistance to clinical decision support* — not system load and not cognitive overload in the vague sense. If you see "overload" in older documents, read it as the old framing. *An intern who understood this evolution already has a head start on the theory section.*
 
 ---
 
@@ -73,8 +81,8 @@ You're past spectating. Concrete entry points, smallest-first:
 
 1. **Run the static-graph capstone cleanly for all patients** — the bounded task from the onboarding plan (full node/edge tables, handle the orphaned events from Tutorial 4, validate counts). Low-risk, high-value, and it's the foundation everything else needs.
 2. **Try to detect the perturbation.** Build the per-encounter entropy series for the 33 sepsis patients and see whether the perturbed ones look different. Even a negative result is a real finding.
-3. **Propose and defend a snapshot + granularity choice** (Forks 1–2) with a written rationale. The team needs this decided; a well-argued proposal moves it.
-4. **Help pin "overload"** (Fork 4) — argue for clinician-cognitive vs. system-process, and make the perturbation's design match. This is theory work the engineering-first team has deferred.
+3. **Come to the next sync with a candidate answer to Andy's question:** *what is the first specific explainability query we want this graph to answer?* The architectural decisions are locked; this question is what the modeling choices are now optimizing for, and the team needs alignment on it.
+4. **Engage with the provider-resistance framing** (Fork 4 reframe) — think through how encounter-based entropy and hub-shift metrics would actually surface in a clinical UI. Andy's example outputs ("this recommendation is based on a well-traveled pathway — 87% of similar patients followed this route") are the target. What would yours look like?
 
 Pick the one that fits your strengths. None of them requires permission to start.
 

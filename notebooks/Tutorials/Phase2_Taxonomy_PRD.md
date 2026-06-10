@@ -1,4 +1,4 @@
-# PRD — EXAI-KG Phase 2 Node/Edge Taxonomy DRAFT
+# PRD — EXAI-KG Phase 2 Node/Edge Taxonomy
 
 ---
 
@@ -44,7 +44,7 @@ plus shared vocabulary Concept nodes. Property-graph model (NetworkX-compatible)
 
 **Out (v1):** AI-suggestion / clinician-action nodes from the grant schema (no model exists yet in the CPU
 phase — these come later). RDF/FHIR semantic layer (Xiao-style) — note as a future option, don't build it
-now. Provider/care_site nodes — propose deferring unless the team wants referral analysis early.
+now. Provider/care_site nodes — deferred to v2 (decision locked 2026-06-09; see architectural decisions below). Schema must stub extension points so they drop in cleanly for v2 — these are where the resistance signal lives in real-world data.
 
 ## Proposed taxonomy (draft)
 
@@ -56,7 +56,7 @@ now. Provider/care_site nodes — propose deferring unless the team wants referr
 | Encounter | visit_occurrence | the temporal anchor; has start/end timestamps |
 | Condition | condition_occurrence → Concept | event node, links to shared Concept |
 | Drug | drug_exposure → Concept | event node |
-| Procedure | procedure_occurrence → Concept | event node; **gaps here if CPT4 unmapped** |
+| Procedure | procedure_occurrence → Concept | event node; CPT4 skipped for prototype (0 unmapped events in Synthea OMOP as of 2026-06-08; forward risk on VA data only) |
 | Measurement | measurement | labs/vitals; value + timestamp |
 | Observation | observation | other clinical facts |
 | Concept | concept (vocab) | **shared** node (SNOMED/LOINC/RxNorm) — Panagiotakis-style normalization so many patients point to one Condition concept |
@@ -85,24 +85,34 @@ each snapshot to produce the entropy-over-time, branching, and centrality-shift 
   properties/node; avoid `is_a`/`type_of` edges; avoid high-density nodes (path explosion).
 - Build from the OMOP tables already in `main`; don't require re-running the ETL.
 
-## Open questions for the team 
+## Architectural decisions (locked 2026-06-09)
 
-1. **Granularity** — one node per raw event (high fidelity, denser graph) vs aggregated patient-state
-   nodes? This is the biggest modeling fork and directly changes what entropy/branching even measure.
-2. **Snapshot definition** — what is a "timestep"? Per encounter? Per fixed time window (e.g. weekly)?
-   Entropy-over-time is undefined until we pick this.
-3. **Property graph now, RDF later?** — confirm we stay NetworkX for the CPU phase and treat Xiao-style
-   FHIR-RDF as an optional later semantic layer.
-4. **CPT4/UMLS** — unmapped procedures = missing Procedure→Concept edges = holes in the topology.
-   *Verified 2026-06-08: the current Synthea OMOP export has **0 unmapped events** across all tables, so
-   this is a forward risk on real-world data, not a present defect.* My recommendation: skip CPT4 for the
-   synthetic prototype, but apply for the UMLS license now (Andy offered) since approval is slow and the VA
-   real-world data will need it.
-5. **Provider/care_site nodes** — model now for referral/bridge analysis, or defer to keep v1 lean?
+These were open forks when this PRD was drafted. Andy locked all five in a team email on 2026-06-09.
 
-## Plan (after sign-off)
+1. **Granularity: raw event nodes.** One node per raw clinical event, not aggregated patient-state nodes.
+   Entropy and branching signals live at the event level; aggregation destroys the fidelity we need.
+   We can always aggregate up analytically; we cannot reconstruct granularity from collapsed states.
 
-1. Lock node/edge tables from feedback above.
-2. Expand each into the full taxonomy doc: properties per node, the metric→structure contract, a small
-   worked example for one synthetic patient.
-3. Hand to Abem as the spec for the edge-list generator.
+2. **Snapshot definition: encounter-based timesteps.** Encounters are the natural unit of clinical
+   decision-making and align with how providers experience the decision sequence. Fixed calendar windows
+   are analytically convenient but clinically arbitrary. Revisit only if the VA cohort structure demands
+   fixed windows.
+
+3. **Graph stack: NetworkX (property graph) for v1; RDF/FHIR later.** The FHIR-RDF semantic layer
+   (Xiao-style) is out of scope for the synthetic prototype. Note as a planned future option.
+
+4. **CPT4: skip for prototype. UMLS license: initiate now.** Zero unmapped events in the current Synthea
+   OMOP export, so CPT4 is not a current problem. However, UMLS license application is being submitted
+   this week (Andy handling) — approval is slow and the VA real-world data will need it.
+
+5. **Provider/care_site nodes: defer to v2, but design for them now.** Do not model these in v1.
+   However, design the schema so they drop in cleanly for v2. Document them explicitly as planned
+   extensions in the full taxonomy doc. These nodes are where the resistance signal lives in real-world
+   data (who overrode what, in what care context, on what pathway structure).
+
+## Plan
+
+1. Expand node/edge tables into the full taxonomy doc: properties per node, the metric→structure
+   contract (which metrics operate on which nodes/edges), provider/care_site extension points stubbed
+   explicitly, and a small worked example for one synthetic patient.
+2. Hand to Abem as the spec for the edge-list generator.
